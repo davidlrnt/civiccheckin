@@ -57,7 +57,7 @@ angular.module('civic-graph', ['ui.bootstrap', 'leaflet-directive', 'ngAnimate']
         if (entityID) {entityID = parseInt(entityID);};
         return entityID
     }
-    $http.get('api/entities')
+    $http.get('http://172.31.98.241:5000/api/entities')
         .success(function(data) {
             $scope.entities = data.nodes;
             var locations = _.uniq(_.pluck(_.flatten(_.pluck($scope.entities, 'locations')), 'locality'));
@@ -86,6 +86,9 @@ angular.module('civic-graph', ['ui.bootstrap', 'leaflet-directive', 'ngAnimate']
             $scope.overviewUrl = 'partials/overview.html?i='+$scope.random;
             $scope.$broadcast('entitiesLoaded');
         });
+    $scope.entitiesLoaded = function() {
+        $scope.$broadcast('entitiesLoaded');
+    }
     // Maybe get from database.
     $scope.entityTypes = {
         'Government': true,
@@ -204,7 +207,7 @@ angular.module('civic-graph', ['ui.bootstrap', 'leaflet-directive', 'ngAnimate']
         });
     }
 
-    $http.get('api/categories')
+    $http.get('http://172.31.98.241:5000/api/categories')
         .success(function(data) {
             $scope.categories = data.categories;
         });
@@ -238,6 +241,7 @@ angular.module('civic-graph', ['ui.bootstrap', 'leaflet-directive', 'ngAnimate']
     }
 }])
 .controller('editCtrl', ['$scope', '$http', '$timeout', function($scope, $http, $timeout) {
+    $scope.editEntity
     $scope.updating = false;
     $scope.error = false;
 
@@ -381,13 +385,17 @@ angular.module('civic-graph', ['ui.bootstrap', 'leaflet-directive', 'ngAnimate']
 
     $scope.savetoDB = function() {
         $scope.updating = true;
-        $http.post('api/save', {'entity': $scope.editEntity})
+        $http.post('http://172.31.98.241:5000/api/save', {'entity': $scope.editEntity})
             .success(function(response) {
                 $scope.setEntities(response.nodes);
                 $scope.setEntityID($scope.editEntity.id);
-                $scope.broadcast('entitiesLoaded')
-                // Call to homeCtrl's parent stopEdit() to change view back and any other high-level changes.
+                // $scope.$broadcast('entitiesLoaded')
                 $scope.updating = false;
+                $scope.safeApply();
+                $scope.entitiesLoaded();
+                console.log(response)
+                // Call to homeCtrl's parent stopEdit() to change view back and any other high-level changes.
+
             })
             .error(function(data, status, headers, config){
                 console.log('ERROR');
@@ -417,7 +425,8 @@ angular.module('civic-graph', ['ui.bootstrap', 'leaflet-directive', 'ngAnimate']
 
     $scope.showLicense =  true;
     $scope.$on('entitiesLoaded', function() {
-        $http.get('api/connections').
+        console.log("on.entitiesLoaded")
+        $http.get('http://172.31.98.241:5000/api/connections').
         success(function(data) {
             _.forEach(_.keys(data.connections), function(type) { $scope.connections[type] = []; });
             _.forEach(data.connections, function(connections, type) {
