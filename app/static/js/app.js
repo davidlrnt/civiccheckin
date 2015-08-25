@@ -87,7 +87,39 @@ angular.module('civic-graph', ['ui.bootstrap', 'leaflet-directive', 'ngAnimate']
             $scope.$broadcast('entitiesLoaded');
         });
     $scope.entitiesLoaded = function() {
-        $scope.$broadcast('entitiesLoaded');
+        $http.get('http://172.31.98.241:5000/api/entities')
+        .success(function(data) {
+            console.log('data')
+
+            console.log(data)
+            $scope.entities = data.nodes;
+            var locations = _.uniq(_.pluck(_.flatten(_.pluck($scope.entities, 'locations')), 'locality'));
+
+            var entitiesByLocation = _.map(locations, function(loc){
+                var findings = _.filter($scope.entities, _.flow(
+                                 _.property('locations'),
+                                 _.partialRight(_.any, { locality : loc })
+                               ));
+
+                return {
+                    name: loc,
+                    type: 'location',
+                    entities: findings,
+                    dict: _.zipObject(_.pluck(findings, 'name'), _.pluck(findings, 'index'))
+                }
+            });
+
+            $scope.searchItems = entitiesByLocation.concat($scope.entities); 
+
+            
+            if ($scope.getURLID()) {
+                // Set the entity to the ID in the URL if it exists.
+                $scope.setEntityID($scope.getURLID());
+            }
+            $scope.overviewUrl = 'partials/overview.html?i='+$scope.random;
+            $scope.$broadcast('entitiesLoaded');
+        });
+        // $scope.$broadcast('entitiesLoaded');
     }
     // Maybe get from database.
     $scope.entityTypes = {
@@ -388,10 +420,14 @@ angular.module('civic-graph', ['ui.bootstrap', 'leaflet-directive', 'ngAnimate']
         $http.post('http://172.31.98.241:5000/api/save', {'entity': $scope.editEntity})
             .success(function(response) {
                 $scope.setEntities(response.nodes);
+                $scope.setEntity($scope.editEntity);
                 $scope.setEntityID($scope.editEntity.id);
                 // $scope.$broadcast('entitiesLoaded')
                 $scope.updating = false;
                 $scope.safeApply();
+                // $scope.entities = {};
+                // $scope.connections = {};
+                d3.selectAll("svg > *").remove();
                 $scope.entitiesLoaded();
                 console.log(response)
                 // Call to homeCtrl's parent stopEdit() to change view back and any other high-level changes.
