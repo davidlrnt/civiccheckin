@@ -42,7 +42,7 @@ angular.module('civic-graph', ['ui.bootstrap', 'leaflet-directive', 'ngAnimate']
     $scope.actions = {'interacted':false};
 
     window.mobilecheck = function() {
-        var check = false;
+        var check = true;
         (function(a){if(/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i.test(a)||/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substr(0,4)))check = true})(navigator.userAgent||navigator.vendor||window.opera);
         return check;
     }
@@ -87,39 +87,35 @@ angular.module('civic-graph', ['ui.bootstrap', 'leaflet-directive', 'ngAnimate']
             $scope.$broadcast('entitiesLoaded');
         });
     $scope.entitiesLoaded = function() {
-        $http.get('http://172.31.98.241:5000/api/entities')
-        .success(function(data) {
-            console.log('data')
+        // $http.get('http://172.31.98.241:5000/api/entities')
+        // .success(function(data) {
+        //     $scope.entities = data.nodes;
+        //     var locations = _.uniq(_.pluck(_.flatten(_.pluck($scope.entities, 'locations')), 'locality'));
 
-            console.log(data)
-            $scope.entities = data.nodes;
-            var locations = _.uniq(_.pluck(_.flatten(_.pluck($scope.entities, 'locations')), 'locality'));
+        //     var entitiesByLocation = _.map(locations, function(loc){
+        //         var findings = _.filter($scope.entities, _.flow(
+        //                          _.property('locations'),
+        //                          _.partialRight(_.any, { locality : loc })
+        //                        ));
 
-            var entitiesByLocation = _.map(locations, function(loc){
-                var findings = _.filter($scope.entities, _.flow(
-                                 _.property('locations'),
-                                 _.partialRight(_.any, { locality : loc })
-                               ));
+        //         return {
+        //             name: loc,
+        //             type: 'location',
+        //             entities: findings,
+        //             dict: _.zipObject(_.pluck(findings, 'name'), _.pluck(findings, 'index'))
+        //         }
+        //     });
 
-                return {
-                    name: loc,
-                    type: 'location',
-                    entities: findings,
-                    dict: _.zipObject(_.pluck(findings, 'name'), _.pluck(findings, 'index'))
-                }
-            });
-
-            $scope.searchItems = entitiesByLocation.concat($scope.entities); 
+        //     $scope.searchItems = entitiesByLocation.concat($scope.entities); 
 
             
-            if ($scope.getURLID()) {
-                // Set the entity to the ID in the URL if it exists.
-                $scope.setEntityID($scope.getURLID());
-            }
-            $scope.overviewUrl = 'partials/overview.html?i='+$scope.random;
+        //     if ($scope.getURLID()) {
+        //         // Set the entity to the ID in the URL if it exists.
+        //         $scope.setEntityID($scope.getURLID());
+        //     }
+        //     $scope.overviewUrl = 'partials/overview.html?i='+$scope.random;
             $scope.$broadcast('entitiesLoaded');
-        });
-        // $scope.$broadcast('entitiesLoaded');
+        // });
     }
     // Maybe get from database.
     $scope.entityTypes = {
@@ -414,22 +410,36 @@ angular.module('civic-graph', ['ui.bootstrap', 'leaflet-directive', 'ngAnimate']
         _.remove($scope.editEntity.expenses, function(e){return e.amount <= 0 || e.year < 1750;;});
 
     }
-
+    $scope.testent;
     $scope.savetoDB = function() {
         $scope.updating = true;
+            $scope.entities = [];
+    $scope.searchItems = null;                 
+    $scope.categories = [];
+    $scope.currentLocation = null;              
+    $scope.clickedLocation = {};                 
+    $scope.clickedLocation.location = null;        
+    $scope.currentEntity;
+    $scope.clickedEntity = {};
+    $scope.clickedEntity.entity = null;
+    $scope.editEntity;
+    $scope.connections = {};
         $http.post('http://172.31.98.241:5000/api/save', {'entity': $scope.editEntity})
             .success(function(response) {
+                // d3.selectAll("svg > *").remove();
+                console.log(response)
+                $scope.testent = $scope.editEntity;
+                // var parent = document.getElementById("network-container");
+                // var child = document.getElementById("network");
+                // parent.removeChild(child);
+                // $("#network-container").html('<svg id="network" ng-if="!mobile" ng-style="{height: \'100vh\'}"></svg>')
                 $scope.setEntities(response.nodes);
                 $scope.setEntity($scope.editEntity);
-                $scope.setEntityID($scope.editEntity.id);
-                // $scope.$broadcast('entitiesLoaded')
+                //$scope.setEntityID($scope.editEntity.id);
+                // $scope.clickedEntity.entity = $scope.editEntity;
                 $scope.updating = false;
                 $scope.safeApply();
-                // $scope.entities = {};
-                // $scope.connections = {};
-                d3.selectAll("svg > *").remove();
                 $scope.entitiesLoaded();
-                console.log(response)
                 // Call to homeCtrl's parent stopEdit() to change view back and any other high-level changes.
 
             })
@@ -452,7 +462,7 @@ angular.module('civic-graph', ['ui.bootstrap', 'leaflet-directive', 'ngAnimate']
         $scope.savetoDB();
     }
 }])
-.controller('networkCtrl', ['$scope', '$http', function($scope, $http) {
+.controller('networkCtrl', ['$scope', '$http', '$timeout', function($scope, $http, $timeout) {
     // TODO: Make a hashmap on the backend of id -> position, then use source: entities[map[sourceid]] to get nodes.
     // See http://stackoverflow.com/q/16824308
     $scope.switchView = function() {
@@ -462,6 +472,7 @@ angular.module('civic-graph', ['ui.bootstrap', 'leaflet-directive', 'ngAnimate']
     $scope.showLicense =  true;
     $scope.$on('entitiesLoaded', function() {
         console.log("on.entitiesLoaded")
+        $scope.connections = {};
         $http.get('http://172.31.98.241:5000/api/connections').
         success(function(data) {
             _.forEach(_.keys(data.connections), function(type) { $scope.connections[type] = []; });
@@ -751,6 +762,8 @@ angular.module('civic-graph', ['ui.bootstrap', 'leaflet-directive', 'ngAnimate']
             'followers': d3.scale.sqrt().domain([10, 10000000]).range([lowerBoundRadius, upperBoundRadius])
         }
         var links = {};
+        var nodes = {};
+        var nodes = "";
         var force = d3.layout.force()
             .size([width, height])
             .nodes($scope.entities)
@@ -915,6 +928,109 @@ angular.module('civic-graph', ['ui.bootstrap', 'leaflet-directive', 'ngAnimate']
             })
         }
 
+        var update = function () {
+
+        // var link = svg.selectAll("line.link")
+        //     .data($scope.connections);
+
+        // link.enter().insert("line")
+        //     .attr("class", "link")
+        //     .attr("x1", function(d) { return d.source.x; })
+        //     .attr("y1", function(d) { return d.source.y; })
+        //     .attr("x2", function(d) { return d.target.x; })
+        //     .attr("y2", function(d) { return d.target.y; });
+
+        // link.exit().remove();
+
+        // var node = svg.selectAll('.node')
+        //     .data($scope.entities)
+
+        // node.enter().append("g")
+        //     .attr("class", "node")
+        //     .call(force.drag);
+
+        // node.append("text")
+        //     .attr("class", "nodetext")
+        //     .attr("dx", 12)
+        //     .attr("dy", ".35em")
+        //     .text(function(d) { return d.name });
+
+        // node.exit().remove();
+
+        // force.on("tick", function() {
+        //   link.attr("x1", function(d) { return d.source.x; })
+        //       .attr("y1", function(d) { return d.source.y; })
+        //       .attr("x2", function(d) { return d.target.x; })
+        //       .attr("y2", function(d) { return d.target.y; });
+
+        //   node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+        // });
+
+        // Restart the force layout.
+
+
+// var links = {};
+//         var force = d3.layout.force()
+//             .size([width, height])
+//             .nodes($scope.entities)
+//             .links(_.flatten(_.values($scope.connections)))
+//             .charge(function(d) {
+//                 return d.employees ? -2*scale.employees(d.employees) : -20;
+//             })
+//             .linkStrength(0)
+//             .linkDistance(50);
+
+//         _.forEach($scope.connections, function(connections, type) {
+//             links[type] = svg.selectAll('.link .'+type+'-link')
+//             .data(connections)
+//             .enter().append('line')
+//             .attr('class', function(d) {d.type = type; return 'link '+type+'-link '+d.source.type+'-link '+d.target.type+'-link';});
+//         });
+
+//         var node = svg.selectAll('.node')
+//             .data($scope.entities)
+//             .enter().append('g')
+//             .attr('class', function(d) {return 'node '+d.type+'-node';})
+//             .call(force.drag);
+
+//         node.append('circle')
+//             .attr('r', function(d) {return d.employees ? scale['employees'](d.employees) : defaultnodesize;});
+
+//         node.append('text')
+//             .text(function(d) {return d.nickname ? d.nickname : d.name;})
+//             .attr('dx', function(d) {return (-0.065*this.getComputedTextLength()/2)+'em';})
+//             .attr('dy', function(d) {return (0.08*this.parentNode.getBBox().height/2 + 0.5)+'em';});
+
+//         force.on('tick', function(e) {
+//             // Cluster in four corners based on offset.
+//             var k = offsetScale*e.alpha;
+//             // console.log(e.alpha)
+//             _.forEach($scope.entities, function(entity) {
+//                 entity.x += offsets[entity.type].x*k;
+//                 entity.y += offsets[entity.type].y*k;
+//                 entity.x = Math.max(upperBoundRadius, Math.min(width - upperBoundRadius, entity.x));
+//                 entity.y = Math.max(upperBoundRadius, Math.min(height - upperBoundRadius, entity.y));
+//             });
+
+//             _.forEach(links, function(link, type) {
+//                 link
+//                 .attr('x1', function(d) {return d.source.x;})
+//                 .attr('y1', function(d) {return d.source.y;})
+//                 .attr('x2', function(d) {return d.target.x;})
+//                 .attr('y2', function(d) {return d.target.y;})
+//             });
+//             node.attr('transform', function(d) {return 'translate('+d.x+','+d.y+')';});
+//         });
+
+        // force
+        //   .nodes($scope.entities)
+        //   .links($scope.connections)
+        //   .start();
+        // drawNetwork();
+        }
+
+
+
         var unfocusLocation = function(location){
             node
             .classed('focused', false)
@@ -945,6 +1061,9 @@ angular.module('civic-graph', ['ui.bootstrap', 'leaflet-directive', 'ngAnimate']
         }
         var click = function(entity) {
             $scope.showLicense = false;
+            console.log("click")
+            console.trace();
+            console.log(entity)
 
             if($scope.clickedLocation.location) {
                 unfocusLocation($scope.clickedLocation.entity);
@@ -1030,6 +1149,31 @@ angular.module('civic-graph', ['ui.bootstrap', 'leaflet-directive', 'ngAnimate']
         $scope.$on('toggleLink', function(event, link) {
             links[link.name]
             .classed({'visible': link.enabled, 'hidden': !link.enabled});
+        });
+        $scope.$on('entitiesLoaded', function(event, link) {
+            // force.nodes($scope.entities)
+            // $timeout(function() {
+            //     console.log('update with timeout fired')
+            //      console.log($scope.testent);
+            //      console.log($scope.entities[30]);
+            //      // click($scope.currentEntity);
+            //      focus($scope.entities[30])
+            //      click($scope.entities[30])
+            //      $scope.clickedEntity.entity = $scope.entities[30];
+            // $scope.actions.interacted = true;
+            // $scope.safeApply();
+
+            // force.start();
+            // }, 3000);
+
+
+            node
+            .data($scope.entities)
+            .enter($scope.currentEntity);
+             
+             // .data().enter() with the new data.
+            if ($scope.currentEntity) click($scope.currentEntity);
+            // click($scope.currentEntity);
         });
         $scope.$on('toggleNode', function(event, type) {
             svg
